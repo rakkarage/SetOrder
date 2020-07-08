@@ -1,5 +1,9 @@
 extends ItemList
 
+onready var _up = $VBoxContainer/Up
+onready var _down = $VBoxContainer/Down
+onready var _save = $VBoxContainer/Save
+
 var _data := {}
 var _started := false
 var _marker := "[resource]"
@@ -19,6 +23,7 @@ func _onUp():
 	var index = get_selected_items()[0]
 	if index > 0:
 		move_item(index, index - 1)
+		ensure_current_is_visible()
 
 func _onDown():
 	if not is_anything_selected():
@@ -26,13 +31,17 @@ func _onDown():
 	var index = get_selected_items()[0]
 	if index < get_item_count():
 		move_item(index, index + 1)
+		ensure_current_is_visible()
 
 func _onSave():
 	pass
 
 func _ready():
+	_up.connect("pressed", self, "_onUp")
+	_down.connect("pressed", self, "_onDown")
+	_save.connect("pressed", self, "_onSave")
 	var file = File.new()
-	if file.open("res://test.txt", File.READ) == OK:
+	if file.open("res://in.txt", File.READ) == OK:
 		while not file.eof_reached():
 			var line = file.get_line()
 			if not _started:
