@@ -15,7 +15,8 @@ func _ready():
 	_save.connect("pressed", self, "_onSave")
 	_read()
 	for key in _data:
-		add_item(key + " " + _data[key])
+		if key != "" and key != "header":
+			add_item(key + " " + _data[key]["name"])
 
 func _input(event):
 	if event is InputEventMouseButton:
@@ -45,7 +46,11 @@ func _onSave():
 	_write()
 
 func _write() -> void:
-	pass
+	var file = File.new()
+	if file.open("res://out.txt", File.WRITE) == OK:
+		# loop arranged list keys after header
+		for key in _data:
+			print(key)
 
 #{ "1": "name" }
 #{ "1": { "name": "name", "data": ["one", "two"] } }
@@ -53,14 +58,21 @@ func _write() -> void:
 func _read() -> void:
 	var file = File.new()
 	if file.open("res://in.txt", File.READ) == OK:
+		_data["header"] = { "data": [] }
 		while not file.eof_reached():
 			var line = file.get_line()
 			if not _started:
+				_data["header"].data.append(line)
 				if line == _marker:
 					_started = true
 				continue
 			var s = line.split("/")
 			var x = line.split("\"")
+			var key = s[0]
+			if not _data.has(str(key)):
+				_data[str(key)] = {}
+			_data[str(key)]["data"] = []
+			_data[str(key)].data.append(line)
 			if x.size() > 1:
-				_data[s[0]] = x[1]
+				_data[str(key)]["name"] = x[1]
 		file.close()
