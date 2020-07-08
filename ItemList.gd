@@ -48,9 +48,16 @@ func _onSave():
 func _write() -> void:
 	var file = File.new()
 	if file.open("res://out.txt", File.WRITE) == OK:
-		# loop arranged list keys after header
 		for key in _data:
-			print(key)
+			if key == "header":
+				for line in _data[key].data:
+					file.store_line(line)
+		for i in get_item_count():
+			var oldKey := get_item_text(i).split(" ")[0]
+			for line in _data[oldKey].data:
+				var test = str(i) + "/" + line.split("/", true, 1)[1]
+				file.store_line(test)
+		file.close()
 
 #{ "1": "name" }
 #{ "1": { "name": "name", "data": ["one", "two"] } }
@@ -71,8 +78,8 @@ func _read() -> void:
 			var key = s[0]
 			if not _data.has(str(key)):
 				_data[str(key)] = {}
-			_data[str(key)]["data"] = []
-			_data[str(key)].data.append(line)
+				_data[str(key)]["data"] = []
+			_data[str(key)]["data"].append(line)
 			if x.size() > 1:
 				_data[str(key)]["name"] = x[1]
 		file.close()
