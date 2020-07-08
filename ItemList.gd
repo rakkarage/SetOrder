@@ -9,6 +9,14 @@ var _started := false
 var _marker := "[resource]"
 var _drag := -1
 
+func _ready():
+	_up.connect("pressed", self, "_onUp")
+	_down.connect("pressed", self, "_onDown")
+	_save.connect("pressed", self, "_onSave")
+	_read()
+	for key in _data:
+		add_item(key + " " + _data[key])
+
 func _input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT:
@@ -34,12 +42,15 @@ func _onDown():
 		ensure_current_is_visible()
 
 func _onSave():
+	_write()
+
+func _write() -> void:
 	pass
 
-func _ready():
-	_up.connect("pressed", self, "_onUp")
-	_down.connect("pressed", self, "_onDown")
-	_save.connect("pressed", self, "_onSave")
+#{ "1": "name" }
+#{ "1": { "name": "name", "data": ["one", "two"] } }
+
+func _read() -> void:
 	var file = File.new()
 	if file.open("res://in.txt", File.READ) == OK:
 		while not file.eof_reached():
@@ -52,5 +63,4 @@ func _ready():
 			var x = line.split("\"")
 			if x.size() > 1:
 				_data[s[0]] = x[1]
-	for key in _data:
-		add_item(key + " " + _data[key])
+		file.close()
